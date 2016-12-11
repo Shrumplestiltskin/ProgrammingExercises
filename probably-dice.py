@@ -1,15 +1,44 @@
-def probability(dice_number, sides, target):
-    return 0.0
+from itertools import permutations
+def sum_to_n(n, size, limit=None):
+    if size == 1:
+        yield [n]
+        return
+    if limit is None:
+        limit = n
+    start = (n + size - 1) // size
+    stop = min(limit, n - size + 1) + 1
+    for i in range(start, stop):
+        for tail in sum_to_n(n - i, size - 1, i):
+            yield [i] + tail
+
+def probability(num_dice, num_sides, number_to_hit):
+    if num_dice * num_sides < number_to_hit: return 0
+    a = []
+    for x in sum_to_n(number_to_hit, num_dice):
+        a.append(x)
+    b = []
+    for x in a:
+        for y in permutations(x, len(x)):
+            b.append(y)
+    return float('{0:.4f}'.format(len(set(b)) / (num_sides ** num_dice)))
 
 if __name__ == '__main__':
-    def almost_equal(checked, correct, significant_digits=4):
-        precision = 0.1 ** significant_digits
-        return correct - precision < checked < correct + precision
-        
-    print(almost_equal(probability(2, 6, 3), 0.0556))
-    print(almost_equal(probability(2, 6, 4), 0.0833))
-    print(almost_equal(probability(2, 6, 7), 0.1667))
-    print(almost_equal(probability(2, 3, 5), 0.2222))
-    print(almost_equal(probability(2, 3, 7), 0.0000))
-    print(almost_equal(probability(3, 6, 7), 0.0694))
-    print(almost_equal(probability(10, 10, 50), 0.0375))
+    print(probability(2, 6, 3))
+    print(probability(2, 6, 4))
+    print(probability(2, 6, 7))
+    print(probability(2, 3, 5))
+    print(probability(2, 3, 7))
+    print(probability(3, 6, 7))
+    print(probability(10, 10, 50))
+
+    #Probability of rolling n x sided dice for n is 1 / x ** n
+    #So for instance to roll a 3 with a six sided dice, it is 1 / 6 ** 3 or 1/216
+
+    #To find the probability of rolling a 4 for instance, you must take the ways to make a four
+    #In this case 1+1+2, 1+2+1, 2+1+1 .....that equals 3/216
+    #Likewise for 7 - 
+    #1 + 1 + 5, 1 + 5 + 1, 5 + 1 + 1 = 3
+    #1 + 2 + 4, 1 + 4 + 2, 4 + 1 + 2, 4 + 2 + 1, 2 + 4 + 1, 2 + 1 + 4 = 6
+    #3 + 2 + 2, 2 + 3 + 2, 2 + 2 + 3 = 3
+    #3 + 3 + 1, 3 + 1 + 3, 1 + 3 + 3 = 3
+    # = 15/216
